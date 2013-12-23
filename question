@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# NOTE: answer is sent to $ANSWER variable.
+
+function __question_usage() {
+  if [ $# -ne 2 ];  then
+  cat <<EOF
+USAGE:
+  $(basename $0) [OPTIONS] <question>
+
+OPTIONS:
+  --type=     yes_no        either 'yes' or 'no'.
+              environment   either 'testing', 'staging' or 'production'.
+              instance-id   an instance id like i-aaaaaaaa
+              integer       a number.
+              multiword     a string of words.
+              singleword    a single word.
+  --quiet                   do not echo the answer
+  --verbose                 echo the answer
+
+EOF
+    exit 1
+  fi
+}
+
+function __question_title() {
+  for arg in "$@"; do
+    if printf -- "${arg}" | grep "^--title=" &> /dev/null; then
+      echo ${arg} | cut -d= -f2
+      return 0
+    fi
+  done
+  echo "question_script"
+  return 0
+}
+
+function __question_type() {
+  for arg in "$@"; do
+    if printf -- "${arg}" | grep "^--type=" &> /dev/null; then
+      echo ${arg} | cut -d= -f2
+      return 0
+    fi
+  done
+  echo "yes_no"
+  return 0
+}
+
+function __question_string() {
+  question_type="$(__question_type $@)"
+
+  for arg in $@; do
+    if printf -- "${arg}" | grep "^--" &> /dev/null; then shift; fi
+  done
+
+  if [[ "$#" -eq 0 ]]; then return 1; fi
+
+  case ${question_type} in
+    "environment")string="${@} (testing|staging|production)? " ;;
+    "instance-id")string="${@} (i-xxxxxxxx)? " ;;
+    "integer")    string="${@} (integer)? " ;;
+    "multiword")  string="${@} (string)? " ;;
+    "singleword") string="${@} (single word)? " ;;
+    "yes_no")     string="${@} (yes|no)? " ;;
+    *)            return 1 ;;
+  esac
+
+  echo "${string}"
+}
+
+function __question_terminal_notifier() {
+  if ! which terminal-notifier &> /dev/null; then return 0; fi
+  terminal-notifier \
+    -message "$(__question_string $@)" \
+    -title "$(__question_title)" \
+    > /dev/null
+}
+
+function __answer_valid() {
+  question_type=$1
+  answer=$2
+
+  if [[ -z "$answer" ]]; then
+    return 1
+  fi
+
+  case "$question_type" in
+    "yes_no")
+      [[ "$answer" == "yes" ]] || [[ "$answer" == "no" ]]
+      return $?
+    ;;
+    "multiword")
+      [[ ! -z "${answer}" ]]
+      return $?
+    ;;
+    "singleword")
+      echo "${answer}" | egrep -i "^[0-9a-z._-]+$" &> /dev/null
+      return $?
+    ;;
+    "integer")
+      echo "${answer}" | egrep "^[0-9]+$" &> /dev/null
+      return $?
+    ;;
+    "environment")
+      [[ "$answer" == "testing" ]] ||
+        [[ "$answer" == "staging" ]] ||
+        [[ "$answer" == "production" ]]
+      return $?
+    ;;
+    "instance-id")
+      echo "${answer}" | egrep "^i-[0-9a-f]{8}$" &> /dev/null
+      return $?
+    ;;
+    *)
+      return 1
+    ;;
+  esac
+}
+
+for arg in $@; do
+  case ${arg} in
+    "--quiet")    VERBOSE="no"  ;;
+    "--verbose")  VERBOSE="yes" ;;
+  esac
+done
+
+question_string="$(__question_string $@)" || __question_usage
+question_type="$(__question_type $@)" || __question_usage
+__question_terminal_notifier $@
+
+while ! __answer_valid "${question_type}" "${ANSWER}"; do
+  cecho -n --magenta "${question_string}" > /dev/stderr
+  read ANSWER
+done
+
+# always return true if verbose is yes
+if [[ "${VERBOSE}" == "yes" ]]; then
+  echo "${ANSWER}"
+  exit 0
+fi
+
+# if answer is no, then exit with a 1.
+if [[ "${ANSWER}" == "no" ]]; then exit 1; fi
+exit 0
