@@ -127,7 +127,11 @@ question_type="$(__question_type $@)" || __question_usage
 __question_terminal_notifier $@
 
 while ! __answer_valid "${question_type}" "${ANSWER}"; do
-  cecho -n --magenta "${question_string}" > /dev/stderr
+  if which cecho > /dev/null; then
+    cecho -n --magenta "${question_string}" > /dev/stderr
+  else
+    echo "${question_string}" > /dev/stderr
+  fi
   read ANSWER
 done
 
