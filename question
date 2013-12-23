@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# NOTE: answer is sent to $ANSWER variable.
 
 function __question_usage() {
   if [ $# -ne 2 ];  then
