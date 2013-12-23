@@ -99,6 +99,7 @@ function __answer_valid() {
       return $?
     ;;
     "environment")
+      # TODO: grep may be better for this
       [[ "$answer" == "testing" ]] ||
         [[ "$answer" == "staging" ]] ||
         [[ "$answer" == "production" ]]
