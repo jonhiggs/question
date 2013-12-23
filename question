@@ -9,12 +9,12 @@ USAGE:
 OPTIONS:
   --type=     yes_no        either 'yes' or 'no'.
               environment   either 'testing', 'staging' or 'production'.
-              instance-id   an instance id like i-aaaaaaaa
+              instance-id   an AWS instance-id like i-aaaaaaaa.
               integer       a number.
               multiword     a string of words.
               singleword    a single word.
-  --quiet                   do not echo the answer
-  --verbose                 echo the answer
+  --quiet                   do not echo the answer.
+  --verbose                 echo the answer.
 
 EOF
     exit 1
