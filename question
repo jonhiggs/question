@@ -100,7 +100,6 @@ function __answer_valid() {
       return $?
     ;;
     *)
-      if [[ "${REVALIDATE}" == "no" ]]; then exit 1; fi
       return 1
     ;;
   esac
@@ -146,10 +145,18 @@ __type_valid                || usage
 __notifier
 __format_question           || usage
 
-while ! __answer_valid "${ANSWER}"; do
+
+if [[ "${REVALIDATE}" == "yes" ]]; then
+  while ! __answer_valid "${ANSWER}"; do
+    ${ECHO_CMD} "${QUESTION}" > /dev/stderr
+    read ANSWER
+  done
+else
   ${ECHO_CMD} "${QUESTION}" > /dev/stderr
   read ANSWER
-done
+  if ! __answer_valid; then echo "Invalid Response!"; exit 1; fi
+fi
+
 
 [[ "${VERBOSE}" == "yes" ]] && echo "${ANSWER}"
 [[ "${VERBOSE}" == "no"  ]] && exit 1
