@@ -1,0 +1,69 @@
+#!/bin/bash
+
+function testYesNo() {
+  yes no | ${Q} 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "no"                        "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes yes | ${Q} 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+}
+
+function testMultiword() {
+  yes "a string" | ${Q} --type=multiword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "a string"                  "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (string)? "       "$(cat /tmp/stderr)"
+}
+
+function testEnvironment() {
+  yes "staging" | ${Q} --type=environment 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "staging"                   "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (testing|staging|production)? "       "$(cat /tmp/stderr)"
+}
+
+function testInstanceId() {
+  yes "i-fff2434d" | ${Q} --type=instance-id 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "i-fff2434d"                "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (i-xxxxxxxx)? "   "$(cat /tmp/stderr)"
+}
+
+function testInteger() {
+  yes "22" | ${Q} --type=integer 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "22"                        "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (integer)? "      "$(cat /tmp/stderr)"
+}
+
+function testSingleword() {
+  yes "abcdefg" | ${Q} --type=singleword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "abcdefg"                   "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
+}
+
+function oneTimeSetUp() {
+  Q="../question --verbose --no-colour --no-notify --no-revalidate question"
+}
+
+function TearDown() {
+  rm /tmp/stdout
+  rm /tmp/stderr
+}
+
+# load and run shUnit2
+source ./shunit/src/shunit2
+
+# vim: ai ts=2 sw=2 et sts=2 ft=sh
