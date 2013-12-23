@@ -1,6 +1,7 @@
 # question
 
-Ask a question until a valid response is received.
+Ask and validate a question within a shell script. It will set correct exit
+codes and/or return the entered value.
 
 ## Requirements
 It should run on any Unix OS. If you have
