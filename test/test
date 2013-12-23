@@ -12,6 +12,12 @@ function testYesNo() {
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes blah | ${Q} 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
 }
 
 function testMultiword() {
@@ -19,6 +25,18 @@ function testMultiword() {
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "a string"                  "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (string)? "       "$(cat /tmp/stderr)"
+
+  yes "word" | ${Q} --type=multiword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "word"                      "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (string)? "       "$(cat /tmp/stderr)"
+
+  yes "" | ${Q} --type=multiword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (string)? "       "$(cat /tmp/stderr)"
 }
 
@@ -28,6 +46,24 @@ function testEnvironment() {
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "staging"                   "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (testing|staging|production)? "       "$(cat /tmp/stderr)"
+
+  yes "testing" | ${Q} --type=environment 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "testing"                   "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (testing|staging|production)? "       "$(cat /tmp/stderr)"
+
+  yes "production" | ${Q} --type=environment 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "production"                "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (testing|staging|production)? "       "$(cat /tmp/stderr)"
+
+  yes "something else" | ${Q} --type=environment 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (testing|staging|production)? "       "$(cat /tmp/stderr)"
 }
 
 function testInstanceId() {
@@ -35,6 +71,18 @@ function testInstanceId() {
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "i-fff2434d"                "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (i-xxxxxxxx)? "   "$(cat /tmp/stderr)"
+
+  yes "i-xxxxxxxx" | ${Q} --type=instance-id 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (i-xxxxxxxx)? "   "$(cat /tmp/stderr)"
+
+  yes "" | ${Q} --type=instance-id 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (i-xxxxxxxx)? "   "$(cat /tmp/stderr)"
 }
 
@@ -44,6 +92,12 @@ function testInteger() {
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "22"                        "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (integer)? "      "$(cat /tmp/stderr)"
+
+  yes "string" | ${Q} --type=integer 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (integer)? "      "$(cat /tmp/stderr)"
 }
 
 function testSingleword() {
@@ -52,10 +106,16 @@ function testSingleword() {
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "abcdefg"                   "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
+
+  yes "a string of words" | ${Q} --type=singleword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
 }
 
 function oneTimeSetUp() {
-  Q="../question --verbose --no-colour --no-notify --no-revalidate question"
+  Q="../question --no-colour --no-notify --no-revalidate question"
 }
 
 function TearDown() {
