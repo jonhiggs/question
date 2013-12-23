@@ -1,9 +1,21 @@
 #!/bin/bash
 
 function testYesNo() {
-  yes no | ${Q} 2> /tmp/stderr > /tmp/stdout
+  yes no | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "no"                        "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes yes | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes no | ${Q} 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
   assertEquals "stdout"         "no"                        "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
 
@@ -112,6 +124,20 @@ function testSingleword() {
   assertEquals "exit status"    "${status}"                 "1"
   assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
+}
+
+function testRevalidate() {
+  yes "blah" | ../question --no-colour --no-notify question 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "you seem to be having a hard time. ;)"         "$(cat /tmp/stdout)"
+}
+
+function testColour() {
+  yes "yes" | ../question --no-notify --no-revalidate question 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stderr"         "[35mquestion (yes|no)? (B[m" "$(cat /tmp/stderr)"
 }
 
 function oneTimeSetUp() {
