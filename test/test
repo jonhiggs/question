@@ -1,6 +1,18 @@
 #!/bin/bash
 
 function testYesNo() {
+  yes no | ${Q} 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes yes | ${Q} 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                "0"
+  assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
   yes no | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
@@ -9,25 +21,13 @@ function testYesNo() {
 
   yes yes | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
   status=$?
-  assertEquals "exit status"    "${status}"                 "0"
-  assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
-  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
-
-  yes no | ${Q} 2> /tmp/stderr > /tmp/stdout
-  status=$?
-  assertEquals "exit status"    "${status}"                 "1"
-  assertEquals "stdout"         "no"                        "$(cat /tmp/stdout)"
-  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
-
-  yes yes | ${Q} 2> /tmp/stderr > /tmp/stdout
-  status=$?
-  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "yes exit status" "${status}"                "0"
   assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
 
   yes blah | ${Q} 2> /tmp/stderr > /tmp/stdout
   status=$?
-  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "blah exit status" "${status}"               "1"
   assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
 }
@@ -124,6 +124,20 @@ function testSingleword() {
   assertEquals "exit status"    "${status}"                 "1"
   assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
+}
+
+function testVerbose() {
+  yes no | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "no"                        "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes yes | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
 }
 
 function testRevalidate() {
