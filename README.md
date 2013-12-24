@@ -5,7 +5,7 @@ codes and/or return the entered value.
 
 ## Requirements
 It should run on any Unix OS. If you have
-[cecho](http://github.com:jonhiggs/cecho.git) then you'll get some colour.
+[cecho](http://github.com/jonhiggs/cecho.git) then you'll get some colour.
 
 ## Usage
 `question [OPTIONS] <question>`
