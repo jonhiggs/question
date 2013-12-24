@@ -154,6 +154,36 @@ function testColour() {
   assertEquals "stderr"         "[35mquestion (yes|no)? (B[m" "$(cat /tmp/stderr)"
 }
 
+function testExamples() {
+  q="../question --type=multiword --no-notify --no-colour --no-revalidate"
+  yes "cows, horses and sheep" | $q "What type of animals do you farm" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "cows, horses and sheep"   "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "What type of animals do you farm (string)? " "$(cat /tmp/stderr)"
+
+  q="../question --type=integer --no-notify --no-colour --no-revalidate"
+  yes 30 | $q "How many animals" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "30"   "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "How many animals (integer)? " "$(cat /tmp/stderr)"
+
+  q="../question --no-notify --no-colour --no-revalidate"
+  yes yes | $q "Do you have any camels" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "Do you have any camels (yes|no)? " "$(cat /tmp/stderr)"
+
+  q="../question --verbose --no-notify --no-colour --no-revalidate"
+  yes yes | $q "Are you a farmer" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "Are you a farmer (yes|no)? " "$(cat /tmp/stderr)"
+}
+
 function oneTimeSetUp() {
   Q="../question --no-colour --no-notify --no-revalidate question"
 }
