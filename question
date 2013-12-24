@@ -115,7 +115,6 @@ NOTIFY="yes"
 REVALIDATE="yes"
 TITLE="question_script"
 TYPE="yes_no"
-VERBOSE="yes"
 
 ### USER SETTINGS #############################################################
 for arg in "$@"; do
@@ -133,6 +132,12 @@ for arg in "$@"; do
     *)                  QUESTION=$(__strip "${QUESTION} ${arg}")      ;;
   esac
 done
+
+if [[ "${TYPE}" == "yes_no" ]] && [[ -z ${VERBOSE} ]]; then
+  VERBOSE="no"
+else
+  VERBOSE="yes"
+fi
 
 if [[ "${COLOUR}" == "yes" ]] && which cecho > /dev/null; then
   ECHO_CMD="cecho -n --magenta"
@@ -157,8 +162,7 @@ else
   if ! __answer_valid; then echo "Invalid Response!"; exit 1; fi
 fi
 
-
-[[ "${VERBOSE}" == "yes" ]] && echo "${ANSWER}"
-[[ "${VERBOSE}" == "no"  ]] && exit 1
+[[ "${VERBOSE}" == "yes" ]] && echo "${ANSWER}" && exit 0
+[[ "${ANSWER}" == "no" ]] && exit 1
 
 exit 0
