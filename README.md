@@ -12,16 +12,21 @@ It should run on any Unix OS. If you have
 
 ## Options
 
-| Switch     | Value        |                                                 |
-| ---------- | ------------ | ------------------------------------------------|
-| --type=    | yes_no       | Either 'yes' or 'no'.                           |
-|            | environment  | Either 'testing', 'staging' or 'production'.    |
-|            | instance-id  | An AWS instance-id like i-aaaaaaaa.             |
-|            | integer      | A number.                                       |
-|            | multiword    | A string of words.                              |
-|            | singleword   | A single word.                                  |
-| --quiet    |              | Do not echo the answer.                         |
-| --verbose  |              | Echo the answer.                                |
+| Switch          | Value        |                                                 |
+| --------------- | ------------ | ------------------------------------------------|
+| --no-colour     |              | Don't colour the string.                        |
+| --no-notify     |              | Do not attempt to notify with terminal-notifier.|
+| --no-revalidate |              | Exit with error if first answer is invalid.     |
+| --title=        | string       | Title to send to terminal notifier.             |
+| --type=         | yes_no       | Either 'yes' or 'no'.                           |
+|                 | environment  | Either 'testing', 'staging' or 'production'.    |
+|                 | instance-id  | An AWS instance-id like i-aaaaaaaa.             |
+|                 | integer      | A number.                                       |
+|                 | multiword    | A string of words.                              |
+|                 | singleword   | A single word.                                  |
+| --quiet         |              | Do not echo the answer.                         |
+| --verbose       |              | Echo the answer.                                |
+
 
 ## Examples
 

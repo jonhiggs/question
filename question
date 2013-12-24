@@ -7,7 +7,10 @@ USAGE:
   $(basename $0) [OPTIONS] <question>
 
 OPTIONS:
+  --no-colour               Don't colour the string.
   --no-notify               Do not attempt to notify with terminal-notifier.
+  --no-revalidate           Exit with error if first answer is invalid.
+  --quiet                   Do not echo the answer.
   --title=    string        Title to send to terminal notifier.
   --type=     yes_no        Either 'yes' or 'no'. (default)
               environment   Either 'testing', 'staging' or 'production'.
@@ -15,9 +18,7 @@ OPTIONS:
               integer       A number.
               multiword     A string of words.
               singleword    A single word.
-  --quiet                   Do not echo the answer.
   --verbose                 Echo the answer.
-  --no-revalidate           Return 1 if answer is invalid
 
 EOF
     exit 1
