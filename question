@@ -74,7 +74,7 @@ function __answer_valid() {
 
   case "${TYPE}" in
     "yes_no")
-      [[ "${ANSWER}" == "yes" ]] || [[ "${ANSWER}" == "no" ]]
+      [[ "${ANSWER}" =~ (yes|no) ]]
       return $?
     ;;
     "multiword")
@@ -82,22 +82,19 @@ function __answer_valid() {
       return $?
     ;;
     "singleword")
-      echo "${ANSWER}" | egrep -i "^[0-9a-z._-]+$" &> /dev/null
+      [[ "${ANSWER}" =~ ^[0-9a-z._-]+$ ]]
       return $?
     ;;
     "integer")
-      echo "${ANSWER}" | egrep "^[0-9]+$" &> /dev/null
+      [[ "${ANSWER}" =~ ^[0-9]+$ ]]
       return $?
     ;;
     "environment")
-      # TODO: grep may be better for this
-      [[ "${ANSWER}" == "testing" ]] ||
-        [[ "${ANSWER}" == "staging" ]] ||
-        [[ "${ANSWER}" == "production" ]]
+      [[ "${ANSWER}" =~ (testing|staging|production) ]]
       return $?
     ;;
     "instance-id")
-      echo "${ANSWER}" | egrep "^i-[0-9a-f]{8}$" &> /dev/null
+      [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]
       return $?
     ;;
     *)
