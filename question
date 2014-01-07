@@ -69,34 +69,14 @@ function __answer_valid() {
   fi
 
   case "${TYPE}" in
-    "yes_no")
-      [[ "${ANSWER}" =~ (yes|no) ]]
-      return $?
-    ;;
-    "multiword")
-      [[ ! -z "${ANSWER}" ]]
-      return $?
-    ;;
-    "singleword")
-      [[ "${ANSWER}" =~ ^[0-9a-z._-]+$ ]]
-      return $?
-    ;;
-    "integer")
-      [[ "${ANSWER}" =~ ^[0-9]+$ ]]
-      return $?
-    ;;
-    "environment")
-      [[ "${ANSWER}" =~ (testing|staging|production) ]]
-      return $?
-    ;;
-    "instance-id")
-      [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]
-      return $?
-    ;;
-    *)
-      return 1
-    ;;
+    "environment")  [[ "${ANSWER}" =~ (testing|staging|production) ]] ;;
+    "instance-id")  [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]              ;;
+    "integer")      [[ "${ANSWER}" =~ ^[0-9]+$ ]]                     ;;
+    "multiword")    [[ ! -z "${ANSWER}" ]]                            ;;
+    "singleword")   [[ "${ANSWER}" =~ ^[0-9a-z._-]+$ ]]               ;;
+    "yes_no")       [[ "${ANSWER}" =~ (yes|no) ]]                     ;;
   esac
+  return $?
 }
 
 function __strip() {
@@ -143,7 +123,6 @@ fi
 __type_valid                || usage
 __notifier
 __format_question           || usage
-
 
 if [[ "${REVALIDATE}" == "yes" ]]; then
   while ! __answer_valid "${ANSWER}"; do
