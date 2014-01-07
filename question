@@ -48,15 +48,11 @@ function __notifier() {
 }
 
 function __type_valid() {
-  case ${TYPE} in
-    "environment")  return 0 ;;
-    "instance-id")  return 0 ;;
-    "integer")      return 0 ;;
-    "multiword")    return 0 ;;
-    "singleword")   return 0 ;;
-    "yes_no")       return 0 ;;
-    *)              return 1 ;;
-  esac
+  types="environment instance-id integer multiword singleword yes_no"
+  for t in ${types}; do
+    if [[ ${TYPE} == $t ]]; then return 0; fi
+  done
+  return 1
 }
 
 function __answer_valid() {
