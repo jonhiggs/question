@@ -132,14 +132,14 @@ for arg in "$@"; do
   v=$(echo ${arg} | cut -d= -f2-)
 
   case "${k}" in
+    "--help")                     usage                                     ;;
     "--no-colour"|"--no-color")   COLOUR="no"                               ;;
+    "--no-notify")                NOTIFY="no"                               ;;
     "--no-revalidate")            REVALIDATE="no"                           ;;
     "--quiet")                    VERBOSE="no"                              ;;
     "--title")                    TITLE="$v"                                ;;
     "--type")                     TYPE="$v"                                 ;;
     "--verbose")                  VERBOSE="yes"                             ;;
-    "--no-notify")                NOTIFY="no"                               ;;
-    "--help")                     usage                                     ;;
     *)                            QUESTION=$(__strip "${QUESTION} ${arg}")  ;;
   esac
 done
