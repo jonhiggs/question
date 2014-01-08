@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 function usage() {
-  if [ $# -ne 2 ];  then
   cat <<EOF
 USAGE:
   $(basename $0) [OPTIONS] <question>
@@ -22,8 +21,7 @@ OPTIONS:
   --verbose                 Echo the answer.
 
 EOF
-    exit 1
-  fi
+  exit 1
 }
 
 function __format_question() {
