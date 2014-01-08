@@ -148,7 +148,7 @@ function testVerbose() {
 
   yes single | ${Q} --verbose --type=singleword 2> /tmp/stderr > /tmp/stdout
   status=$?
-  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "exit status"    "0"                         "${status}"
   assertEquals "stdout"         "single"                    "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
 }
@@ -156,13 +156,19 @@ function testVerbose() {
 function testQuiet() {
   yes yes | ${Q} --quiet 2> /tmp/stderr > /tmp/stdout
   status=$?
-  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "exit status"    "0"                         "${status}"
+  assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes no | ${Q} --quiet 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "1"                         "${status}"
   assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
 
   yes single | ${Q} --quiet --type=singleword 2> /tmp/stderr > /tmp/stdout
   status=$?
-  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "exit status"    "0"                         "${status}"
   assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
 }

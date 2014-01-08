@@ -94,19 +94,19 @@ function print_question() {
 }
 
 function print_answer() {
-  if [[ "${QUIET}" == "yes" ]]; then VERBOSE="no"; fi
-  if [[ -z ${VERBOSE} ]] && [[ -z ${QUIET} ]]; then
-    # use defaults
+  if [[ -z ${VERBOSE} ]]; then
     case "${TYPE}" in
       "yes_no")   VERBOSE="no"    ;;
       *)          VERBOSE="yes"   ;;
     esac
   fi
 
-  [[ "${VERBOSE}" == "yes" ]] &&
+  if [[ "${VERBOSE}" == "yes" ]]; then
     echo "${ANSWER}" && exit 0
-
-  [[ "${ANSWER}" == "no" ]] && exit 1
+  else
+    [[ ${ANSWER} != "no" ]]
+    exit $?
+  fi
 }
 
 ### DEFAULT SETTINGS ##########################################################
@@ -124,7 +124,7 @@ for arg in "$@"; do
   case "${k}" in
     "--no-colour"|"--no-color")   COLOUR="no"                               ;;
     "--no-revalidate")            REVALIDATE="no"                           ;;
-    "--quiet")                    QUIET="yes"                               ;;
+    "--quiet")                    VERBOSE="no"                              ;;
     "--title")                    TITLE="$v"                                ;;
     "--type")                     TYPE="$v"                                 ;;
     "--verbose")                  VERBOSE="yes"                             ;;
