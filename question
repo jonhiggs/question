@@ -83,6 +83,16 @@ function __strip() {
   echo $1 | psed 's/^\ *//g' | psed 's/\ *$//g'
 }
 
+function print_question() {
+  cecho_path="$(which cecho)"
+  if [[ -z "${cecho_path}" ]]; then COLOUR="no"; fi
+
+  case "${COLOUR}" in
+    "yes")  ${cecho_path} -n --magenta "${QUESTION}" ;;
+    *)      echo -n "${QUESTION}"                    ;;
+  esac
+}
+
 ### DEFAULT SETTINGS ##########################################################
 COLOUR="yes"
 NOTIFY="yes"
@@ -113,12 +123,6 @@ else
   VERBOSE="yes"
 fi
 
-if [[ "${COLOUR}" == "yes" ]] && which cecho > /dev/null; then
-  ECHO_CMD="cecho -n --magenta"
-else
-  ECHO_CMD="echo -n"
-fi
-
 [[ -z ${QUESTION} ]]        && usage
 __type_valid                || usage
 __notifier
@@ -126,11 +130,11 @@ __format_question           || usage
 
 if [[ "${REVALIDATE}" == "yes" ]]; then
   while ! __answer_valid "${ANSWER}"; do
-    ${ECHO_CMD} "${QUESTION}" > /dev/stderr
+    print_question > /dev/stderr
     read ANSWER
   done
 else
-  ${ECHO_CMD} "${QUESTION}" > /dev/stderr
+  print_question > /dev/stderr
   read ANSWER
   if ! __answer_valid; then echo "Invalid Response!"; exit 1; fi
 fi
