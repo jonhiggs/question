@@ -145,6 +145,26 @@ function testVerbose() {
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes single | ${Q} --verbose --type=singleword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "single"                    "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
+}
+
+function testQuiet() {
+  yes yes | ${Q} --quiet 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
+
+  yes single | ${Q} --quiet --type=singleword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
 }
 
 function testRevalidate() {
