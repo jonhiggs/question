@@ -7,6 +7,9 @@ codes and/or return the entered value.
 It should run on any Unix OS. If you have
 [cecho](http://github.com/jonhiggs/cecho.git) then you'll get some colour.
 
+If you don't have GNU date (this applies to you if your running OS X or BSD),
+you'll need to get it for support of type=date.
+
 ## Usage
 `question [OPTIONS] <question>`
 
@@ -17,14 +20,15 @@ It should run on any Unix OS. If you have
 | --no-colour     |              | Don't colour the string.                        |
 | --no-notify     |              | Do not attempt to notify with terminal-notifier.|
 | --no-revalidate |              | Exit with error if first answer is invalid.     |
+| --quiet         |              | Do not echo the answer.                         |
 | --title=        | string       | Title to send to terminal notifier.             |
 | --type=         | yes_no       | Either 'yes' or 'no'.                           |
+|                 | date         | A date (requires GNU date).                     |
 |                 | environment  | Either 'testing', 'staging' or 'production'.    |
 |                 | instance-id  | An AWS instance-id like i-aaaaaaaa.             |
 |                 | integer      | A number.                                       |
 |                 | multiword    | A string of words.                              |
 |                 | singleword   | A single word.                                  |
-| --quiet         |              | Do not echo the answer.                         |
 | --verbose       |              | Echo the answer.                                |
 
 
