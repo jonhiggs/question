@@ -93,6 +93,22 @@ function print_question() {
   esac
 }
 
+function print_answer() {
+  if [[ "${QUIET}" == "yes" ]]; then VERBOSE="no"; fi
+  if [[ -z ${VERBOSE} ]] && [[ -z ${QUIET} ]]; then
+    # use defaults
+    case "${TYPE}" in
+      "yes_no")   VERBOSE="no"    ;;
+      *)          VERBOSE="yes"   ;;
+    esac
+  fi
+
+  [[ "${VERBOSE}" == "yes" ]] &&
+    echo "${ANSWER}" && exit 0
+
+  [[ "${ANSWER}" == "no" ]] && exit 1
+}
+
 ### DEFAULT SETTINGS ##########################################################
 COLOUR="yes"
 NOTIFY="yes"
@@ -108,7 +124,7 @@ for arg in "$@"; do
   case "${k}" in
     "--no-colour"|"--no-color")   COLOUR="no"                               ;;
     "--no-revalidate")            REVALIDATE="no"                           ;;
-    "--quiet")                    VERBOSE="no"                              ;;
+    "--quiet")                    QUIET="yes"                               ;;
     "--title")                    TITLE="$v"                                ;;
     "--type")                     TYPE="$v"                                 ;;
     "--verbose")                  VERBOSE="yes"                             ;;
@@ -116,12 +132,6 @@ for arg in "$@"; do
     *)                            QUESTION=$(__strip "${QUESTION} ${arg}")  ;;
   esac
 done
-
-if [[ "${TYPE}" == "yes_no" ]] && [[ -z ${VERBOSE} ]]; then
-  VERBOSE="no"
-else
-  VERBOSE="yes"
-fi
 
 [[ -z ${QUESTION} ]]        && usage
 __type_valid                || usage
@@ -139,7 +149,6 @@ else
   if ! __answer_valid; then echo "Invalid Response!"; exit 1; fi
 fi
 
-[[ "${VERBOSE}" == "yes" ]] && echo "${ANSWER}" && exit 0
-[[ "${ANSWER}" == "no" ]] && exit 1
+print_answer
 
 exit 0
