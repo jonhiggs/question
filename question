@@ -13,6 +13,7 @@ OPTIONS:
   --quiet                   Do not echo the answer.
   --title=    string        Title to send to terminal notifier.
   --type=     yes_no        Either 'yes' or 'no'. (default)
+              date          A date (requires GNU date).
               environment   Either 'testing', 'staging' or 'production'.
               instance-id   An AWS instance-id like i-aaaaaaaa.
               integer       A number.
@@ -27,6 +28,7 @@ EOF
 
 function __format_question() {
   case ${TYPE} in
+    "date")         QUESTION="${QUESTION} (date)? " ;;
     "environment")  QUESTION="${QUESTION} (testing|staging|production)? " ;;
     "instance-id")  QUESTION="${QUESTION} (i-xxxxxxxx)? " ;;
     "integer")      QUESTION="${QUESTION} (integer)? " ;;
@@ -48,7 +50,7 @@ function __notifier() {
 }
 
 function __type_valid() {
-  types="environment instance-id integer multiword singleword yes_no"
+  types="date environment instance-id integer multiword singleword yes_no"
   for t in ${types}; do
     if [[ ${TYPE} == $t ]]; then return 0; fi
   done
@@ -62,6 +64,13 @@ function __answer_valid() {
     exit 1
   fi
 
+  if [[ ${TYPE} == "date" ]]; then
+    if ! [[ $(${DATE_CMD} --version 2> /dev/null) =~ GNU\ coreutils ]]; then
+      echo "Error: You are not running GNU date."
+      exit 1
+    fi
+  fi
+
   if [[ -z "${ATTEMPT}" ]]; then
     ATTEMPT=1
   else
@@ -69,12 +78,13 @@ function __answer_valid() {
   fi
 
   case "${TYPE}" in
-    "environment")  [[ "${ANSWER}" =~ (testing|staging|production) ]] ;;
-    "instance-id")  [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]              ;;
-    "integer")      [[ "${ANSWER}" =~ ^[0-9]+$ ]]                     ;;
-    "multiword")    [[ ! -z "${ANSWER}" ]]                            ;;
-    "singleword")   [[ "${ANSWER}" =~ ^[0-9a-z._-]+$ ]]               ;;
-    "yes_no")       [[ "${ANSWER}" =~ (yes|no) ]]                     ;;
+    "date")         ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
+    "environment")  [[ "${ANSWER}" =~ (testing|staging|production) ]]       ;;
+    "instance-id")  [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]                    ;;
+    "integer")      [[ "${ANSWER}" =~ ^[0-9]+$ ]]                           ;;
+    "multiword")    [[ ! -z "${ANSWER}" ]]                                  ;;
+    "singleword")   [[ "${ANSWER}" =~ ^[0-9a-z._-]+$ ]]                     ;;
+    "yes_no")       [[ "${ANSWER}" =~ (yes|no) ]]                           ;;
   esac
   return $?
 }
@@ -115,6 +125,8 @@ NOTIFY="yes"
 REVALIDATE="yes"
 TITLE="question_script"
 TYPE="yes_no"
+DATE_CMD=$(which gdate || which date)
+DATE_ACCURACY="seconds"
 
 ### USER SETTINGS #############################################################
 for arg in "$@"; do

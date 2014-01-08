@@ -32,6 +32,20 @@ function testYesNo() {
   assertEquals "stderr"         "question (yes|no)? "       "$(cat /tmp/stderr)"
 }
 
+function testDate() {
+  yes "1/1/2001" | ${Q} --type=date 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "2001-01-01 00:00:00+01:00" "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (date)? "         "$(cat /tmp/stderr)"
+
+  yes "blah" | ${Q} --type=date 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (date)? "         "$(cat /tmp/stderr)"
+}
+
 function testMultiword() {
   yes "a string" | ${Q} --type=multiword 2> /tmp/stderr > /tmp/stdout
   status=$?
