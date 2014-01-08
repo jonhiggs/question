@@ -1,5 +1,10 @@
 #!/bin/bash
 
+function testHelp() {
+  ../question --help 2> /tmp/stderr > /tmp/stdout
+  assertEquals "stdout"         "USAGE:"                    "$(head -n1 /tmp/stdout)"
+}
+
 function testYesNo() {
   yes no | ${Q} 2> /tmp/stderr > /tmp/stdout
   status=$?

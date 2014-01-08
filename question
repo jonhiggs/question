@@ -141,6 +141,7 @@ for arg in "$@"; do
     "--type")                     TYPE="$v"                                 ;;
     "--verbose")                  VERBOSE="yes"                             ;;
     "--no-notify")                NOTIFY="no"                               ;;
+    "--help")                     usage                                     ;;
     *)                            QUESTION=$(__strip "${QUESTION} ${arg}")  ;;
   esac
 done
