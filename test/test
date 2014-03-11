@@ -117,6 +117,26 @@ function testInstanceId() {
   assertEquals "stderr"         "question (i-xxxxxxxx)? "   "$(cat /tmp/stderr)"
 }
 
+function testAmi() {
+  yes "ami-fff2434d" | ${Q} --type=ami 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "ami-fff2434d"              "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (ami-xxxxxxxx)? " "$(cat /tmp/stderr)"
+
+  yes "ami-xxxxxxxx" | ${Q} --type=ami 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (ami-xxxxxxxx)? " "$(cat /tmp/stderr)"
+
+  yes "" | ${Q} --type=ami 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (ami-xxxxxxxx)? " "$(cat /tmp/stderr)"
+}
+
 function testInteger() {
   yes "22" | ${Q} --type=integer 2> /tmp/stderr > /tmp/stdout
   status=$?

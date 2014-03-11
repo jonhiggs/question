@@ -6,18 +6,19 @@ USAGE:
   $(basename $0) [OPTIONS] <question>
 
 OPTIONS:
-  --no-colour               Don't colour the string.
+  --no-colour                 Don't colour the string.
   --no-notify               Do not attempt to notify with terminal-notifier.
   --no-revalidate           Exit with error if first answer is invalid.
   --quiet                   Do not echo the answer.
   --title=    string        Title to send to terminal notifier.
-  --type=     yes_no        Either 'yes' or 'no'. (default)
+  --type=     ami           An Amazon Machine Image ami-aaaaaaaa.
               date          A date (requires GNU date).
               environment   Either 'testing', 'staging' or 'production'.
               instance-id   An AWS instance-id like i-aaaaaaaa.
               integer       A number.
               multiword     A string of words.
               singleword    A single word.
+              yes_no        Either 'yes' or 'no'. (default)
   --verbose                 Echo the answer.
 
 EOF
@@ -26,6 +27,7 @@ EOF
 
 function __format_question() {
   case ${TYPE} in
+    "ami")          QUESTION="${QUESTION} (ami-xxxxxxxx)? " ;;
     "date")         QUESTION="${QUESTION} (date)? " ;;
     "environment")  QUESTION="${QUESTION} (testing|staging|production)? " ;;
     "instance-id")  QUESTION="${QUESTION} (i-xxxxxxxx)? " ;;
@@ -48,7 +50,7 @@ function __notifier() {
 }
 
 function __type_valid() {
-  types="date environment instance-id integer multiword singleword yes_no"
+  types="ami date environment instance-id integer multiword singleword yes_no"
   for t in ${types}; do
     if [[ ${TYPE} == $t ]]; then return 0; fi
   done
@@ -76,6 +78,7 @@ function __answer_valid() {
   fi
 
   case "${TYPE}" in
+    "ami")          [[ "${ANSWER}" =~ ^ami-[0-9a-f]{8}$ ]]                  ;;
     "date")         ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
     "environment")  [[ "${ANSWER}" =~ (testing|staging|production) ]]       ;;
     "instance-id")  [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]                    ;;
