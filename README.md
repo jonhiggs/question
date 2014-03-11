@@ -5,31 +5,30 @@ codes and/or return the entered value.
 
 ## Requirements
 It should run on any Unix OS. If you have
-[cecho](http://github.com/jonhiggs/cecho.git) then you'll get some colour.
-
-If you don't have GNU date (this applies to you if your running OS X or BSD),
-you'll need to get it for support of type=date.
+[cecho](http://github.com:jonhiggs/cecho.git) then you'll get some colour.
 
 ## Usage
 `question [OPTIONS] <question>`
 
 ## Options
 
-| Switch          | Value        |                                                 |
-| --------------- | ------------ | ------------------------------------------------|
-| --no-colour     |              | Don't colour the string.                        |
-| --no-notify     |              | Do not attempt to notify with terminal-notifier.|
-| --no-revalidate |              | Exit with error if first answer is invalid.     |
-| --quiet         |              | Do not echo the answer.                         |
-| --title=        | string       | Title to send to terminal notifier.             |
-| --type=         | yes_no       | Either 'yes' or 'no'.                           |
-|                 | date         | A date (requires GNU date).                     |
-|                 | environment  | Either 'testing', 'staging' or 'production'.    |
-|                 | instance-id  | An AWS instance-id like i-aaaaaaaa.             |
-|                 | integer      | A number.                                       |
-|                 | multiword    | A string of words.                              |
-|                 | singleword   | A single word.                                  |
-| --verbose       |              | Echo the answer.                                |
+
+| Switch          | Value            |                                                     |
+| --------------- | ---------------- | --------------------------------------------------- |
+| --no-colour     |                  | Don't colour the string.
+| --no-notify     |                  | Do not attempt to notify with terminal-notifier.
+| --no-revalidate |                  | Exit with error if first answer is invalid.
+| --quiet         |                  | Do not echo the answer.
+| --title=        | string           | Title to send to terminal notifier.
+| --type=         | ami              | An Amazon Machine Image ami-aaaaaaaa.
+|                 | date             | A date (requires GNU date).
+|                 | environment      | Either 'testing', 'staging' or 'production'.
+|                 | instance-id      | An AWS instance-id like i-aaaaaaaa.
+|                 | integer          | A number.
+|                 | multiword        | A string of words.
+|                 | singleword       | A single word.
+|                 | yes_no           | Either 'yes' or 'no'. (default)
+| --verbose       |                  | Echo the answer.
 
 
 ## Examples

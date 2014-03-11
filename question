@@ -6,20 +6,20 @@ USAGE:
   $(basename $0) [OPTIONS] <question>
 
 OPTIONS:
-  --no-colour                 Don't colour the string.
-  --no-notify               Do not attempt to notify with terminal-notifier.
-  --no-revalidate           Exit with error if first answer is invalid.
-  --quiet                   Do not echo the answer.
-  --title=    string        Title to send to terminal notifier.
-  --type=     ami           An Amazon Machine Image ami-aaaaaaaa.
-              date          A date (requires GNU date).
-              environment   Either 'testing', 'staging' or 'production'.
-              instance-id   An AWS instance-id like i-aaaaaaaa.
-              integer       A number.
-              multiword     A string of words.
-              singleword    A single word.
-              yes_no        Either 'yes' or 'no'. (default)
-  --verbose                 Echo the answer.
+  --no-colour          Don't colour the string.
+  --no-notify          Do not attempt to notify with terminal-notifier.
+  --no-revalidate      Exit with error if first answer is invalid.
+  --quiet              Do not echo the answer.
+  --title=string       Title to send to terminal notifier.
+  --type=ami           An Amazon Machine Image ami-aaaaaaaa.
+         date          A date (requires GNU date).
+         environment   Either 'testing', 'staging' or 'production'.
+         instance-id   An AWS instance-id like i-aaaaaaaa.
+         integer       A number.
+         multiword     A string of words.
+         singleword    A single word.
+         yes_no        Either 'yes' or 'no'. (default)
+  --verbose            Echo the answer.
 
 EOF
   exit 1
