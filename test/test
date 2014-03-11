@@ -71,6 +71,56 @@ function testMultiword() {
   assertEquals "stderr"         "question (string)? "       "$(cat /tmp/stderr)"
 }
 
+function testList() {
+  yes "one,two" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "one two"                   "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  yes "one, two" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "one two"                   "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  yes "one, two,     three" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "one two three"             "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  yes "one, two   ,three" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "one two three"             "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  yes "one, two,  three" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "one two three"             "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  yes "one, two three" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "one \"two three\""             "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  yes "one" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "one"                       "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  yes "" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+}
+
 function testEnvironment() {
   yes "staging" | ${Q} --type=environment 2> /tmp/stderr > /tmp/stdout
   status=$?

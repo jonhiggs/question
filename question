@@ -16,6 +16,7 @@ OPTIONS:
          environment   Either 'testing', 'staging' or 'production'.
          instance-id   An AWS instance-id like i-aaaaaaaa.
          integer       A number.
+         list          A comma delimited list.
          multiword     A string of words.
          singleword    A single word.
          yes_no        Either 'yes' or 'no'. (default)
@@ -32,6 +33,7 @@ function __format_question() {
     "environment")  QUESTION="${QUESTION} (testing|staging|production)? " ;;
     "instance-id")  QUESTION="${QUESTION} (i-xxxxxxxx)? " ;;
     "integer")      QUESTION="${QUESTION} (integer)? " ;;
+    "list")         QUESTION="${QUESTION} (comma delimited list)? " ;;
     "multiword")    QUESTION="${QUESTION} (string)? " ;;
     "singleword")   QUESTION="${QUESTION} (single word)? " ;;
     "yes_no")       QUESTION="${QUESTION} (yes|no)? " ;;
@@ -50,7 +52,7 @@ function __notifier() {
 }
 
 function __type_valid() {
-  types="ami date environment instance-id integer multiword singleword yes_no"
+  types="ami date environment instance-id integer list multiword singleword yes_no"
   for t in ${types}; do
     if [[ ${TYPE} == $t ]]; then return 0; fi
   done
@@ -83,6 +85,7 @@ function __answer_valid() {
     "environment")  [[ "${ANSWER}" =~ (testing|staging|production) ]]       ;;
     "instance-id")  [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]                    ;;
     "integer")      [[ "${ANSWER}" =~ ^[0-9]+$ ]]                           ;;
+    "list")         [[ "${ANSWER}" =~ ^.+$ ]]                               ;;
     "multiword")    [[ ! -z "${ANSWER}" ]]                                  ;;
     "singleword")   [[ "${ANSWER}" =~ ^[0-9a-z._-]+$ ]]                     ;;
     "yes_no")       [[ "${ANSWER}" =~ (yes|no) ]]                           ;;
@@ -99,12 +102,16 @@ function print_question() {
   if [[ -z "${cecho_path}" ]]; then COLOUR="no"; fi
 
   case "${COLOUR}" in
-    "yes")  ${cecho_path} -n --magenta "${QUESTION}" ;;
-    *)      echo -n "${QUESTION}"                    ;;
+    "yes")  ${cecho_path} -n --magenta "${QUESTION}" > /dev/stderr ;;
+    *)      echo -n "${QUESTION}" > /dev/stderr      ;;
   esac
 }
 
 function print_answer() {
+  if [[ ${TYPE} == "list" ]]; then
+    ANSWER=$(echo ${ANSWER} | sed 's/\ *,\ */ /g')
+  fi
+
   if [[ -z ${VERBOSE} ]]; then
     case "${TYPE}" in
       "yes_no")   VERBOSE="no"    ;;
