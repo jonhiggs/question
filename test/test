@@ -219,6 +219,12 @@ function testSingleword() {
   assertEquals "exit status"    "${status}"                 "1"
   assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
+
+  yes "CamelCase" | ${Q} --type=singleword 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "CamelCase"                 "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (single word)? "  "$(cat /tmp/stderr)"
 }
 
 function testInvalidType() {

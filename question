@@ -87,7 +87,7 @@ function __answer_valid() {
     "integer")      [[ "${ANSWER}" =~ ^[0-9]+$ ]]                           ;;
     "list")         [[ "${ANSWER}" =~ ^.+$ ]]                               ;;
     "multiword")    [[ ! -z "${ANSWER}" ]]                                  ;;
-    "singleword")   [[ "${ANSWER}" =~ ^[0-9a-z._-]+$ ]]                     ;;
+    "singleword")   [[ "${ANSWER}" =~ ^[^\ ]+$ ]]                           ;;
     "yes_no")       [[ "${ANSWER}" =~ (yes|no) ]]                           ;;
   esac
   return $?
