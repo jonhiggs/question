@@ -25,6 +25,7 @@ It should run on any Unix OS. If you have
 |                 | environment      | Either 'testing', 'staging' or 'production'.
 |                 | instance-id      | An AWS instance-id like i-aaaaaaaa.
 |                 | integer          | A number.
+|                 | list             | A comma delimited list.
 |                 | multiword        | A string of words.
 |                 | singleword       | A single word.
 |                 | yes_no           | Either 'yes' or 'no'. (default)
@@ -50,3 +51,11 @@ You can enter a block using the return value of a question.
 Or you can get the actual value that was set with the verbose switch:
 
         FARMER=$(question --verbose "Are you a farmer")
+
+You can loop over a list of answers:
+
+    RESULT=0
+    for x in $(./question --type=list "What scores did you get"); do
+        RESULT=$(( ${RESULT} + $x ))
+    done
+    echo ${RESULT}
