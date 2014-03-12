@@ -317,7 +317,7 @@ function testExamples() {
   assertEquals "stdout"         "yes"                       "$(cat /tmp/stdout)"
   assertEquals "stderr"         "Are you a farmer (yes|no)? " "$(cat /tmp/stderr)"
 
-  q="../question --no-colour --type=list"
+  q="../question --no-colour --no-notify --type=list"
   yes "2, 3, 4" | $q "What scores did you get" 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
