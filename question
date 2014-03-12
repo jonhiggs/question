@@ -14,6 +14,7 @@ OPTIONS:
   --type=ami           An Amazon Machine Image ami-aaaaaaaa.
          date          A date (requires GNU date).
          environment   Either 'testing', 'staging' or 'production'.
+         existing_file A file that should already exist.
          instance-id   An AWS instance-id like i-aaaaaaaa.
          integer       A number.
          list          A comma delimited list.
@@ -28,16 +29,17 @@ EOF
 
 function __format_question() {
   case ${TYPE} in
-    "ami")          QUESTION="${QUESTION} (ami-xxxxxxxx)? " ;;
-    "date")         QUESTION="${QUESTION} (date)? " ;;
-    "environment")  QUESTION="${QUESTION} (testing|staging|production)? " ;;
-    "instance-id")  QUESTION="${QUESTION} (i-xxxxxxxx)? " ;;
-    "integer")      QUESTION="${QUESTION} (integer)? " ;;
-    "list")         QUESTION="${QUESTION} (comma delimited list)? " ;;
-    "multiword")    QUESTION="${QUESTION} (string)? " ;;
-    "singleword")   QUESTION="${QUESTION} (single word)? " ;;
-    "yes_no")       QUESTION="${QUESTION} (yes|no)? " ;;
-    *)              return 1 ;;
+    "ami")            QUESTION="${QUESTION} (ami-xxxxxxxx)? " ;;
+    "date")           QUESTION="${QUESTION} (date)? " ;;
+    "environment")    QUESTION="${QUESTION} (testing|staging|production)? " ;;
+    "existing-file")  QUESTION="${QUESTION} (file)? " ;;
+    "instance-id")    QUESTION="${QUESTION} (i-xxxxxxxx)? " ;;
+    "integer")        QUESTION="${QUESTION} (integer)? " ;;
+    "list")           QUESTION="${QUESTION} (comma delimited list)? " ;;
+    "multiword")      QUESTION="${QUESTION} (string)? " ;;
+    "singleword")     QUESTION="${QUESTION} (single word)? " ;;
+    "yes_no")         QUESTION="${QUESTION} (yes|no)? " ;;
+    *)                return 1 ;;
   esac
 }
 
@@ -52,7 +54,7 @@ function __notifier() {
 }
 
 function __type_valid() {
-  types="ami date environment instance-id integer list multiword singleword yes_no"
+  types="ami date environment existing-file instance-id integer list multiword singleword yes_no"
   for t in ${types}; do
     if [[ ${TYPE} == $t ]]; then return 0; fi
   done
@@ -80,15 +82,16 @@ function __answer_valid() {
   fi
 
   case "${TYPE}" in
-    "ami")          [[ "${ANSWER}" =~ ^ami-[0-9a-f]{8}$ ]]                  ;;
-    "date")         ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
-    "environment")  [[ "${ANSWER}" =~ (testing|staging|production) ]]       ;;
-    "instance-id")  [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]                    ;;
-    "integer")      [[ "${ANSWER}" =~ ^[0-9]+$ ]]                           ;;
-    "list")         [[ "${ANSWER}" =~ ^.+$ ]]                               ;;
-    "multiword")    [[ ! -z "${ANSWER}" ]]                                  ;;
-    "singleword")   [[ "${ANSWER}" =~ ^[^\ ]+$ ]]                           ;;
-    "yes_no")       [[ "${ANSWER}" =~ (yes|no) ]]                           ;;
+    "ami")            [[ "${ANSWER}" =~ ^ami-[0-9a-f]{8}$ ]]                ;;
+    "date")           ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
+    "environment")    [[ "${ANSWER}" =~ (testing|staging|production) ]]     ;;
+    "existing-file")  [[ -f "${ANSWER}" ]]                                  ;;
+    "instance-id")    [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]                  ;;
+    "integer")        [[ "${ANSWER}" =~ ^[0-9]+$ ]]                         ;;
+    "list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
+    "multiword")      [[ ! -z "${ANSWER}" ]]                                ;;
+    "singleword")     [[ "${ANSWER}" =~ ^[^\ ]+$ ]]                         ;;
+    "yes_no")         [[ "${ANSWER}" =~ (yes|no) ]]                         ;;
   esac
   return $?
 }

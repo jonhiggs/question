@@ -153,6 +153,32 @@ function testEnvironment() {
   assertEquals "stderr"         "question (testing|staging|production)? "       "$(cat /tmp/stderr)"
 }
 
+function testExistingFile() {
+  yes `basename $0` | ${Q} --type=existing-file 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         `basename $0`               "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (file)? "         "$(cat /tmp/stderr)"
+
+  yes "/tmp/file with spaces" | ${Q} --type=existing-file 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "/tmp/file with spaces"     "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (file)? "         "$(cat /tmp/stderr)"
+
+  yes /tmp/file\ with\ spaces | ${Q} --type=existing-file 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "/tmp/file with spaces"     "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (file)? "         "$(cat /tmp/stderr)"
+
+  yes "nonexistantfile" | ${Q} --type=existing-file 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "File does not exist!"    "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (file)? "       "$(cat /tmp/stderr)"
+}
+
 function testInstanceId() {
   yes "i-fff2434d" | ${Q} --type=instance-id 2> /tmp/stderr > /tmp/stdout
   status=$?
@@ -163,13 +189,13 @@ function testInstanceId() {
   yes "i-xxxxxxxx" | ${Q} --type=instance-id 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "1"
-  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stdout"         "Not a valid instance-id!"  "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (i-xxxxxxxx)? "   "$(cat /tmp/stderr)"
 
   yes "" | ${Q} --type=instance-id 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "1"
-  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stdout"         "Not a valid instance-id!"  "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (i-xxxxxxxx)? "   "$(cat /tmp/stderr)"
 }
 
@@ -327,11 +353,13 @@ function testExamples() {
 
 function oneTimeSetUp() {
   Q="../question --no-colour --no-notify --no-revalidate question"
+  touch /tmp/file\ with\ spaces
 }
 
 function TearDown() {
   rm /tmp/stdout
   rm /tmp/stderr
+  rm /tmp/file\ with\ spaces
 }
 
 # load and run shUnit2

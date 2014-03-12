@@ -23,6 +23,7 @@ It should run on any Unix OS. If you have
 | --type=         | ami              | An Amazon Machine Image ami-aaaaaaaa.
 |                 | date             | A date (requires GNU date).
 |                 | environment      | Either 'testing', 'staging' or 'production'.
+|                 | existing_file    | A file that currently exists.
 |                 | instance-id      | An AWS instance-id like i-aaaaaaaa.
 |                 | integer          | A number.
 |                 | list             | A comma delimited list.
