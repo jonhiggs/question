@@ -109,7 +109,8 @@ function print_question() {
 
 function print_answer() {
   if [[ ${TYPE} == "list" ]]; then
-    ANSWER=$(echo ${ANSWER} | sed 's/\ *,\ */ /g')
+    ANSWER=$(echo ${ANSWER} | sed 's/"/\\"/g')
+    ANSWER=$(echo ${ANSWER} | sed 's/^/"/' | sed 's/\ *,\ */" "/g' | sed 's/$/"/')
   fi
 
   if [[ -z ${VERBOSE} ]]; then
