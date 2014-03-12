@@ -314,6 +314,38 @@ function testColour() {
   assertEquals "stderr"         "[35mquestion (yes|no)? (B[m" "$(cat /tmp/stderr)"
 }
 
+function testAcceptedInupts() {
+  yes "accepted" | ${Q} --accepted-inputs=accepted 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "accepted"                  "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (accepted)? "     "$(cat /tmp/stderr)"
+
+  yes "accepted" | ${Q} --accepted-inputs=a......d 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "accepted"                  "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (a......d)? "     "$(cat /tmp/stderr)"
+
+  #yes "a" | ${Q} --accepted-inputs="(a|b)" 2> /tmp/stderr > /tmp/stdout
+  #status=$?
+  #assertEquals "exit status"    "${status}"                 "0"
+  #assertEquals "stdout"         "a"                  "$(cat /tmp/stdout)"
+  #assertEquals "stderr"         "question (a|b)? "          "$(cat /tmp/stderr)"
+
+  #yes "b" | ${Q} --accepted-inputs="(a|b)" 2> /tmp/stderr > /tmp/stdout
+  #status=$?
+  #assertEquals "exit status"    "${status}"                 "0"
+  #assertEquals "stdout"         "b"                  "$(cat /tmp/stdout)"
+  #assertEquals "stderr"         "question (a|b)? "          "$(cat /tmp/stderr)"
+
+  yes "blah" | ${Q} --accepted-inputs=accepted 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (accepted)? "     "$(cat /tmp/stderr)"
+}
+
 function testExamples() {
   q="../question --type=multiword --no-notify --no-colour --no-revalidate"
   yes "cows, horses and sheep" | $q "What type of animals do you farm" 2> /tmp/stderr > /tmp/stdout

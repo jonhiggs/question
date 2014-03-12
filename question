@@ -6,22 +6,23 @@ USAGE:
   $(basename $0) [OPTIONS] <question>
 
 OPTIONS:
-  --no-colour          Don't colour the string.
-  --no-notify          Do not attempt to notify with terminal-notifier.
-  --no-revalidate      Exit with error if first answer is invalid.
-  --quiet              Do not echo the answer.
-  --title=string       Title to send to terminal notifier.
-  --type=ami           An Amazon Machine Image ami-aaaaaaaa.
-         date          A date (requires GNU date).
-         environment   Either 'testing', 'staging' or 'production'.
-         existing_file A file that should already exist.
-         instance-id   An AWS instance-id like i-aaaaaaaa.
-         integer       A number.
-         list          A comma delimited list.
-         multiword     A string of words.
-         singleword    A single word.
-         yes_no        Either 'yes' or 'no'. (default)
-  --verbose            Echo the answer.
+  --accepted-inputs=/regex/ Regex string describing what is acceptable.
+  --no-colour               Don't colour the string.
+  --no-notify               Do not attempt to notify with terminal-notifier.
+  --no-revalidate           Exit with error if first answer is invalid.
+  --quiet                   Do not echo the answer.
+  --title=string            Title to send to terminal notifier.
+  --type=ami                An Amazon Machine Image ami-aaaaaaaa.
+         date               A date (requires GNU date).
+         environment        Either 'testing', 'staging' or 'production'.
+         existing_file      A file that should already exist.
+         instance-id        An AWS instance-id like i-aaaaaaaa.
+         integer            A number.
+         list               A comma delimited list.
+         multiword          A string of words.
+         singleword         A single word.
+         yes_no             Either 'yes' or 'no'. (default)
+  --verbose                 Echo the answer.
 
 EOF
   exit 1
@@ -29,6 +30,7 @@ EOF
 
 function __format_question() {
   case ${TYPE} in
+    "regex")          QUESTION="${QUESTION} (${ACCEPTED_INPUTS})? ";;
     "ami")            QUESTION="${QUESTION} (ami-xxxxxxxx)? " ;;
     "date")           QUESTION="${QUESTION} (date)? " ;;
     "environment")    QUESTION="${QUESTION} (testing|staging|production)? " ;;
@@ -54,7 +56,7 @@ function __notifier() {
 }
 
 function __type_valid() {
-  types="ami date environment existing-file instance-id integer list multiword singleword yes_no"
+  types="ami date environment existing-file instance-id integer list multiword singleword yes_no regex"
   for t in ${types}; do
     if [[ ${TYPE} == $t ]]; then return 0; fi
   done
@@ -90,6 +92,7 @@ function __answer_valid() {
     "integer")        [[ "${ANSWER}" =~ ^[0-9]+$ ]]                         ;;
     "list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
     "multiword")      [[ ! -z "${ANSWER}" ]]                                ;;
+    "regex")          echo "${ANSWER}" | grep ${ACCEPTED_INPUTS} &> /dev/null ;;
     "singleword")     [[ "${ANSWER}" =~ ^[^\ ]+$ ]]                         ;;
     "yes_no")         [[ "${ANSWER}" =~ (yes|no) ]]                         ;;
   esac
@@ -146,6 +149,7 @@ for arg in "$@"; do
   v=$(echo ${arg} | cut -d= -f2-)
 
   case "${k}" in
+    "--accepted-inputs")          ACCEPTED_INPUTS="$v"; TYPE="regex"        ;;
     "--help")                     usage                                     ;;
     "--no-colour"|"--no-color")   COLOUR="no"                               ;;
     "--no-notify")                NOTIFY="no"                               ;;
