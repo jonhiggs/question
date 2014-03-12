@@ -47,7 +47,7 @@ function testDate() {
   yes "blah" | ${Q} --type=date 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "1"
-  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stdout"         "Not a date!"               "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (date)? "         "$(cat /tmp/stderr)"
 }
 
@@ -149,7 +149,7 @@ function testEnvironment() {
   yes "something else" | ${Q} --type=environment 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "1"
-  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stdout"         "Not a valid environment!"  "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (testing|staging|production)? "       "$(cat /tmp/stderr)"
 }
 

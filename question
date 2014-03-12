@@ -171,7 +171,16 @@ if [[ "${REVALIDATE}" == "yes" ]]; then
 else
   print_question > /dev/stderr
   read ANSWER
-  if ! __answer_valid; then echo "Invalid Response!"; exit 1; fi
+
+  case "${TYPE}" in
+    "existing-file") error_msg="File does not exist!"     ;;
+    "date")          error_msg="Not a date!"              ;;
+    "environment")   error_msg="Not a valid environment!" ;;
+    "instance-id")   error_msg="Not a valid instance-id!" ;;
+    *)               error_msg="Invalid Response!"        ;;
+  esac
+
+  if ! __answer_valid; then echo ${error_msg}; exit 1; fi
 fi
 
 print_answer
