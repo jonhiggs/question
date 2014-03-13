@@ -30,7 +30,7 @@ EOF
 
 function __format_question() {
   case ${TYPE} in
-    "regex")          QUESTION="${QUESTION} (${ACCEPTED_INPUTS})? ";;
+    "regex")          QUESTION="${QUESTION} ('${ACCEPTED_INPUTS}')? ";;
     "ami")            QUESTION="${QUESTION} (ami-xxxxxxxx)? " ;;
     "date")           QUESTION="${QUESTION} (date)? " ;;
     "environment")    QUESTION="${QUESTION} (testing|staging|production)? " ;;
@@ -92,7 +92,7 @@ function __answer_valid() {
     "integer")        [[ "${ANSWER}" =~ ^[0-9]+$ ]]                         ;;
     "list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
     "multiword")      [[ ! -z "${ANSWER}" ]]                                ;;
-    "regex")          echo "${ANSWER}" | grep ${ACCEPTED_INPUTS} &> /dev/null ;;
+    "regex")          echo "${ANSWER}" | egrep ${ACCEPTED_INPUTS} &> /dev/null ;;
     "singleword")     [[ "${ANSWER}" =~ ^[^\ ]+$ ]]                         ;;
     "yes_no")         [[ "${ANSWER}" =~ (yes|no) ]]                         ;;
   esac

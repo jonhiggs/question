@@ -319,31 +319,55 @@ function testAcceptedInupts() {
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "accepted"                  "$(cat /tmp/stdout)"
-  assertEquals "stderr"         "question (accepted)? "     "$(cat /tmp/stderr)"
+  assertEquals "stderr"         "question ('accepted')? "     "$(cat /tmp/stderr)"
 
   yes "accepted" | ${Q} --accepted-inputs=a......d 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         "accepted"                  "$(cat /tmp/stdout)"
-  assertEquals "stderr"         "question (a......d)? "     "$(cat /tmp/stderr)"
+  assertEquals "stderr"         "question ('a......d')? "     "$(cat /tmp/stderr)"
 
-  #yes "a" | ${Q} --accepted-inputs="(a|b)" 2> /tmp/stderr > /tmp/stdout
-  #status=$?
-  #assertEquals "exit status"    "${status}"                 "0"
-  #assertEquals "stdout"         "a"                  "$(cat /tmp/stdout)"
-  #assertEquals "stderr"         "question (a|b)? "          "$(cat /tmp/stderr)"
+  yes "a" | ${Q} --accepted-inputs="(a|b)" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "a"                  "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question ('(a|b)')? "          "$(cat /tmp/stderr)"
 
-  #yes "b" | ${Q} --accepted-inputs="(a|b)" 2> /tmp/stderr > /tmp/stdout
-  #status=$?
-  #assertEquals "exit status"    "${status}"                 "0"
-  #assertEquals "stdout"         "b"                  "$(cat /tmp/stdout)"
-  #assertEquals "stderr"         "question (a|b)? "          "$(cat /tmp/stderr)"
+  yes "b" | ${Q} --accepted-inputs="(a|b)" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "b"                  "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question ('(a|b)')? "          "$(cat /tmp/stderr)"
+
+  yes "a" | ${Q} --accepted-inputs="^[^a]$" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question ('^[^a]$')? "     "$(cat /tmp/stderr)"
+
+  yes "b" | ${Q} --accepted-inputs="^[^a]$" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "b"                         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question ('^[^a]$')? "     "$(cat /tmp/stderr)"
+
+  yes "aaa" | ${Q} --accepted-inputs="^a{3}$" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         "aaa"                       "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question ('^a{3}$')? "     "$(cat /tmp/stderr)"
+
+  yes "aaaa" | ${Q} --accepted-inputs="^a{3}$" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question ('^a{3}$')? "     "$(cat /tmp/stderr)"
 
   yes "blah" | ${Q} --accepted-inputs=accepted 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "1"
   assertEquals "stdout"         "Invalid Response!"         "$(cat /tmp/stdout)"
-  assertEquals "stderr"         "question (accepted)? "     "$(cat /tmp/stderr)"
+  assertEquals "stderr"         "question ('accepted')? "     "$(cat /tmp/stderr)"
 }
 
 function testExamples() {
