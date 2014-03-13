@@ -314,7 +314,7 @@ function testColour() {
   assertEquals "stderr"         "[35mquestion (yes|no)? (B[m" "$(cat /tmp/stderr)"
 }
 
-function testAcceptedInupts() {
+function testAcceptedInputs() {
   yes "accepted" | ${Q} --accepted-inputs=accepted 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
