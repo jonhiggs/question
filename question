@@ -188,18 +188,15 @@ for arg in "$@"; do
 done
 
 __set_type_settings
-
-# TODO: refactor
-
 __notifier
 
 if [[ "${REVALIDATE}" == "yes" ]]; then
   while ! __answer_valid "${ANSWER}"; do
-    print_question > /dev/stderr
+    print_question
     read ANSWER
   done
 else
-  print_question > /dev/stderr
+  print_question
   read ANSWER
 
   # TODO: refactor
