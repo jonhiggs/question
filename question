@@ -38,6 +38,16 @@ function __notifier() {
     > /dev/null
 }
 
+function error() {
+  MSG=$1
+  if [[ "${COLOUR}" == "yes" ]]; then
+    cecho --red "${MSG}"
+  else
+    echo "${MSG}"
+  fi
+  exit 1
+}
+
 function __set_type_settings() {
   # set the defaults
   [[ -z ${QUESTION} ]]    && QUESTION="Please answer..."
@@ -168,6 +178,15 @@ function print_answer() {
   fi
 }
 
+function ask_question() {
+  while ! __answer_valid "${ANSWER}"; do
+    print_question
+    read ANSWER
+
+    [[ "${REVALIDATE}" == "no" ]] && return 0
+  done
+}
+
 ### USER SETTINGS #############################################################
 for arg in "$@"; do
   k=$(echo ${arg} | cut -d= -f1)
@@ -190,22 +209,7 @@ done
 __set_type_settings
 __notifier
 
-if [[ "${REVALIDATE}" == "yes" ]]; then
-  while ! __answer_valid "${ANSWER}"; do
-    print_question
-    read ANSWER
-  done
-else
-  print_question
-  read ANSWER
-
-  # TODO: refactor
-  if ! __answer_valid; then
-    echo ${ERROR_MSG}
-    exit 1
-  fi
-fi
-
+ask_question
+__answer_valid || error "${ERROR_MSG}"
 print_answer
-
 exit 0
