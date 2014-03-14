@@ -49,6 +49,8 @@ function testDate() {
   assertEquals "exit status"    "${status}"                 "1"
   assertEquals "stdout"         "Not a date!"               "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (date)? "         "$(cat /tmp/stderr)"
+
+  # TODO: write a test confirming behaviour when GNU date does not exist.
 }
 
 function testMultiword() {

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+STDERR="/dev/stderr"
+STDOUT="/dev/stdout"
+NULL="/dev/null"
 
 function usage() {
   cat <<EOF
@@ -28,14 +31,14 @@ EOF
   exit 1
 }
 
-function __notifier() {
-  if [[ "${NOTIFY}" == "no" ]]; then return 0; fi
-  if ! which terminal-notifier &> /dev/null; then return 0; fi
+function notify() {
+  [[ "${NOTIFY}" == "yes" ]] || return 0
+  which terminal-notifier &> ${NULL} || return 0
 
   terminal-notifier \
     -message "${QUESTION}?" \
     -title "${TITLE}" \
-    > /dev/null
+    > ${NULL}
 }
 
 function error() {
@@ -48,11 +51,12 @@ function error() {
   exit 1
 }
 
-function __set_type_settings() {
+function set_type_settings() {
   # set the defaults
-  [[ -z ${QUESTION} ]]    && QUESTION="Please answer..."
+  [[ -z ${ATTEMPT} ]]     && ATTEMPT=1
   [[ -z ${ERROR_MSG} ]]   && ERROR_MSG="Invalid Response!"
   [[ -z ${NOTIFY} ]]      && NOTIFY="yes"
+  [[ -z ${QUESTION} ]]    && QUESTION="Please answer..."
   [[ -z ${REVALIDATE} ]]  && REVALIDATE="yes"
   [[ -z ${TITLE} ]]       && TITLE="question_script"
   [[ -z ${TYPE} ]]        && TYPE="yes_no"
@@ -65,10 +69,9 @@ function __set_type_settings() {
 
 
   case ${TYPE} in
-    "existing-file")
-      ACCEPTED_INPUTS=""
-      ERROR_MSG="File does not exist!"
-      FORMAT_HINT="file"
+    "ami")
+      ACCEPTED_INPUTS="^ami-[a-f0-9]{8}$"
+      FORMAT_HINT="ami-xxxxxxxx"
     ;;
     "date")
       ACCEPTED_INPUTS=""
@@ -76,23 +79,19 @@ function __set_type_settings() {
       DATE_CMD=$(which gdate || which date)
       ERROR_MSG="Not a date!"
       FORMAT_HINT="date"
-    ;;
-    "regex")
-      ACCEPTED_INPUTS=${ACCEPTED_INPUTS}
-      FORMAT_HINT="'${ACCEPTED_INPUTS}'"
-    ;;
-    "ami")
-      ACCEPTED_INPUTS="^ami-[a-f0-9]{8}$"
-      FORMAT_HINT="ami-xxxxxxxx"
-    ;;
-    "list")
-      ACCEPTED_INPUTS=".*"
-      FORMAT_HINT="comma delimited list"
+
+      if ! [[ $(${DATE_CMD} --version 2> ${NULL}) =~ GNU\ coreutils ]]; then
+        error "Error: You are not running GNU date."
+      fi
     ;;
     "environment")
       ACCEPTED_INPUTS="^(testing|staging|production)$"
       ERROR_MSG="Not a valid environment!"
       FORMAT_HINT="testing|staging|production"
+    ;;
+    "existing-file")
+      ERROR_MSG="File does not exist!"
+      FORMAT_HINT="file"
     ;;
     "instance-id")
       ACCEPTED_INPUTS="^i-[a-f0-9]{8}$"
@@ -103,9 +102,16 @@ function __set_type_settings() {
       ACCEPTED_INPUTS="^[0-9]+$"
       FORMAT_HINT="integer"
     ;;
+    "list")
+      FORMAT_HINT="comma delimited list"
+    ;;
     "multiword")
       ACCEPTED_INPUTS="^.*[^\ ].*$"
       FORMAT_HINT="string"
+    ;;
+    "regex")
+      ACCEPTED_INPUTS=${ACCEPTED_INPUTS}
+      FORMAT_HINT="'${ACCEPTED_INPUTS}'"
     ;;
     "singleword")
       ACCEPTED_INPUTS="^[^\ ]+$"
@@ -119,51 +125,39 @@ function __set_type_settings() {
       usage
     ;;
   esac
-
-  QUESTION="${QUESTION} (${FORMAT_HINT})? "
 }
 
-function __answer_valid() {
-  if [[ -z "${ANSWER}" ]]; then return 1; fi
+function answer_valid() {
+  [[ -z "${ANSWER}" ]] && return 1
   [[ "${ATTEMPT}" -gt 30 ]] && error "you seem to be having a hard time. ;)"
-
-  if [[ ${TYPE} == "date" ]]; then
-    if ! [[ $(${DATE_CMD} --version 2> /dev/null) =~ GNU\ coreutils ]]; then
-      error "Error: You are not running GNU date."
-    fi
-  fi
-
-  if [[ -z "${ATTEMPT}" ]]; then
-    ATTEMPT=1
-  else
-    ATTEMPT=$(( ${ATTEMPT} + 1 ))
-  fi
+  ATTEMPT=$(( ${ATTEMPT} + 1 ))
 
   case "${TYPE}" in
-    "date")           ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
-    "existing-file")  [[ -f "${ANSWER}" ]]                                  ;;
-    *)                echo "${ANSWER}" | egrep "${ACCEPTED_INPUTS}" &> /dev/null ;;
+    "date") ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> ${NULL}) ;;
+    "existing-file")  [[ -f "${ANSWER}" ]] ;;
+    *) echo "${ANSWER}" | egrep "${ACCEPTED_INPUTS}" &> ${NULL} ;;
   esac
   return $?
 }
 
 function __strip() {
+  # strip whitespace from start and end of string.
   echo $1 | psed 's/^\ *//g' | psed 's/\ *$//g'
 }
 
 function print_question() {
-  if [[ "${COLOUR}" == "yes" ]]; then
-    cecho -n --magenta "${QUESTION}" > /dev/stderr
-  else
-    echo -n "${QUESTION}" > /dev/stderr
-  fi
+  q="${QUESTION} (${FORMAT_HINT})? "
+  [[ "${COLOUR}" == "yes" ]] && cecho -n --magenta "$q" > ${STDERR}
+  [[ "${COLOUR}" == "no" ]]  && echo -n "$q" > ${STDERR}
 }
 
 function print_answer() {
   # convert list into quoted strings.
   if [[ ${TYPE} == "list" ]]; then
-    ANSWER=$(echo ${ANSWER} | sed 's/"/\\"/g')
-    ANSWER=$(echo ${ANSWER} | sed 's/^/"/' | sed 's/\ *,\ */" "/g' | sed 's/$/"/')
+    ANSWER=$(echo ${ANSWER} | sed 's/"/\\"/g')        # escape quotes.
+    ANSWER=$(echo ${ANSWER} | sed 's/^/"/')           # add a " to the start.
+    ANSWER=$(echo ${ANSWER} | sed 's/\ *,\ */" "/g')  # convert , to '" "'
+    ANSWER=$(echo ${ANSWER} | sed 's/$/"/')           # add a " to the end.
   fi
 
   if [[ "${VERBOSE}" == "yes" ]]; then
@@ -176,15 +170,15 @@ function print_answer() {
 }
 
 function ask_question() {
-  while ! __answer_valid "${ANSWER}"; do
+  notify
+  while ! answer_valid "${ANSWER}"; do
     print_question
     read ANSWER
-
     [[ "${REVALIDATE}" == "no" ]] && return 0
   done
 }
 
-### USER SETTINGS #############################################################
+### RUN COMMAND ###############################################################
 for arg in "$@"; do
   k=$(echo ${arg} | cut -d= -f1)
   v=$(echo ${arg} | cut -d= -f2-)
@@ -203,10 +197,8 @@ for arg in "$@"; do
   esac
 done
 
-__set_type_settings
-__notifier
-
+set_type_settings
 ask_question
-__answer_valid || error "${ERROR_MSG}"
+answer_valid || error "${ERROR_MSG}"
 print_answer
 exit 0
