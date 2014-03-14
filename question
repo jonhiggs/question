@@ -39,6 +39,14 @@ function __notifier() {
 }
 
 function __set_type_settings() {
+  # set the defaults
+  [[ -z ${COLOUR} ]]      && COLOUR="yes"
+  [[ -z ${ERROR_MSG} ]]   && ERROR_MSG="Invalid Response!"
+  [[ -z ${NOTIFY} ]]      && NOTIFY="yes"
+  [[ -z ${REVALIDATE} ]]  && REVALIDATE="yes"
+  [[ -z ${TITLE} ]]       && TITLE="question_script"
+  [[ -z ${TYPE} ]]        && TYPE="yes_no"
+
   case ${TYPE} in
     "existing-file")
       ACCEPTED_INPUTS=""
@@ -48,9 +56,11 @@ function __set_type_settings() {
     ;;
     "date")
       ACCEPTED_INPUTS=""
+      DATE_ACCURACY="seconds"
+      DATE_CMD=$(which gdate || which date)
+      DEFAULT_VERBOSE="yes"
       ERROR_MSG="Not a date!"
       FORMAT_HINT="date"
-      DEFAULT_VERBOSE="yes"
     ;;
     "regex")
       ACCEPTED_INPUTS=${ACCEPTED_INPUTS}
@@ -103,8 +113,7 @@ function __set_type_settings() {
       usage
     ;;
   esac
-
-  [[ -z ${VERBOSE} ]] && VERBOSE=${DEFAULT_VERBOSE}
+  [[ -z ${VERBOSE} ]]     && VERBOSE=${DEFAULT_VERBOSE}
 }
 
 function __answer_valid() {
@@ -165,16 +174,6 @@ function print_answer() {
   fi
 }
 
-### DEFAULT SETTINGS ##########################################################
-COLOUR="yes"
-NOTIFY="yes"
-REVALIDATE="yes"
-TITLE="question_script"
-TYPE="yes_no"
-DATE_CMD=$(which gdate || which date)
-DATE_ACCURACY="seconds"
-[[ -z ${ERROR_MSG} ]] && ERROR_MSG="Invalid Response!"
-
 ### USER SETTINGS #############################################################
 for arg in "$@"; do
   k=$(echo ${arg} | cut -d= -f1)
@@ -195,6 +194,8 @@ for arg in "$@"; do
 done
 
 __set_type_settings
+
+# TODO: refactor
 QUESTION="${QUESTION} (${FORMAT_HINT})? "
 
 [[ -z ${QUESTION} ]]        && usage
