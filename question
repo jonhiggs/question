@@ -40,6 +40,7 @@ function __notifier() {
 
 function __set_type_settings() {
   # set the defaults
+  [[ -z ${QUESTION} ]]    && QUESTION="Please answer..."
   [[ -z ${COLOUR} ]]      && COLOUR="yes"
   [[ -z ${ERROR_MSG} ]]   && ERROR_MSG="Invalid Response!"
   [[ -z ${NOTIFY} ]]      && NOTIFY="yes"
@@ -105,6 +106,8 @@ function __set_type_settings() {
       usage
     ;;
   esac
+
+  QUESTION="${QUESTION} (${FORMAT_HINT})? "
 }
 
 function __answer_valid() {
@@ -187,8 +190,6 @@ done
 __set_type_settings
 
 # TODO: refactor
-[[ -z ${QUESTION} ]]        && usage
-QUESTION="${QUESTION} (${FORMAT_HINT})? "
 
 __notifier
 

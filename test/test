@@ -266,14 +266,6 @@ function testInvalidType() {
   assertEquals "stdout"         "USAGE:"                    "$(head -n1 /tmp/stdout)"
 }
 
-function testInvalidQuestion() {
-  ../question --no-notify --no-revalidate 2> /tmp/stderr > /tmp/stdout
-  status=$?
-  assertEquals "exit status"    "${status}"                 "1"
-  assertEquals "stdout"         "USAGE:"                    "$(head -n1 /tmp/stdout)"
-}
-
-
 function testVerbose() {
   yes no | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
   status=$?
@@ -326,6 +318,14 @@ function testColour() {
   status=$?
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stderr"         "[35mquestion (yes|no)? (B[m" "$(cat /tmp/stderr)"
+}
+
+function testWithoutQuestion() {
+  yes "yes" | ../question --no-notify --no-revalidate --no-colour 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "0"                         "${status}"
+  assertEquals "stdout"         ""                          "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "Please answer... (yes|no)? "  "$(cat /tmp/stderr)"
 }
 
 function testAcceptedInputs() {
