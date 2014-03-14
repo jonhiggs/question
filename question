@@ -9,7 +9,7 @@ USAGE:
   $(basename $0) [OPTIONS] <question>
 
 OPTIONS:
-  --accepted-inputs=/regex/ Regex string describing what is acceptable.
+  --accepted-inputs=regex   Regular Expression describing acceptable inputs.
   --no-colour               Don't colour the string.
   --no-notify               Do not attempt to notify with terminal-notifier.
   --no-revalidate           Exit with error if first answer is invalid.
@@ -59,6 +59,8 @@ function set_type_settings() {
   [[ -z ${QUESTION} ]]    && QUESTION="Please answer..."
   [[ -z ${REVALIDATE} ]]  && REVALIDATE="yes"
   [[ -z ${TITLE} ]]       && TITLE="question_script"
+
+  [[ -z ${TYPE} ]]        && [[ ! -z ${ACCEPTED_INPUTS} ]] && TYPE="regex"
   [[ -z ${TYPE} ]]        && TYPE="yes_no"
 
   [[ -z ${VERBOSE} ]]     && [[ "${TYPE}" == "yes_no" ]] && VERBOSE="no"
@@ -110,7 +112,6 @@ function set_type_settings() {
       FORMAT_HINT="string"
     ;;
     "regex")
-      ACCEPTED_INPUTS=${ACCEPTED_INPUTS}
       FORMAT_HINT="'${ACCEPTED_INPUTS}'"
     ;;
     "singleword")

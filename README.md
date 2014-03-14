@@ -15,6 +15,7 @@ It should run on any Unix OS. If you have
 
 | Switch          | Value            |                                                     |
 | --------------- | ---------------- | --------------------------------------------------- |
+| --accepted-inputs= | regex          | Regular Expression describing acceptable inputs.
 | --no-colour     |                  | Don't colour the string.
 | --no-notify     |                  | Do not attempt to notify with terminal-notifier.
 | --no-revalidate |                  | Exit with error if first answer is invalid.
@@ -43,6 +44,10 @@ Set a variable with a value:
 
         ANIMALS=$(question --type=integer "How many animals")
 
+Set a variable with one of two options:
+
+        GENDER=$(question --accepted-inputs="^(boy|girl)$" "Whats your gender")
+
 You can enter a block using the return value of a question.
 
         if question "Do you have any camels"; then
@@ -60,3 +65,4 @@ You can loop over a list of answers:
         RESULT=$(( ${RESULT} + $x ))
     done
     echo ${RESULT}
+

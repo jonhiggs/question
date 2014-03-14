@@ -421,6 +421,13 @@ function testExamples() {
   assertEquals "exit status"    "${status}"                 "0"
   assertEquals "stdout"         '"2" "3" "4"'               "$(cat /tmp/stdout)"
   assertEquals "stderr"         "What scores did you get (comma delimited list)? " "$(cat /tmp/stderr)"
+
+  q="../question --no-colour --no-notify --accepted-inputs=^(boy|girl)$"
+  yes "boy" | $q "Whats your gender" 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         'boy'                       "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "Whats your gender ('^(boy|girl)$')? " "$(cat /tmp/stderr)"
 }
 
 function oneTimeSetUp() {
