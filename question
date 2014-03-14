@@ -187,9 +187,9 @@ done
 __set_type_settings
 
 # TODO: refactor
+[[ -z ${QUESTION} ]]        && usage
 QUESTION="${QUESTION} (${FORMAT_HINT})? "
 
-[[ -z ${QUESTION} ]]        && usage
 __notifier
 
 if [[ "${REVALIDATE}" == "yes" ]]; then

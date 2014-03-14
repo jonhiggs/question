@@ -266,6 +266,14 @@ function testInvalidType() {
   assertEquals "stdout"         "USAGE:"                    "$(head -n1 /tmp/stdout)"
 }
 
+function testInvalidQuestion() {
+  ../question --no-notify --no-revalidate 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "1"
+  assertEquals "stdout"         "USAGE:"                    "$(head -n1 /tmp/stdout)"
+}
+
+
 function testVerbose() {
   yes no | ${Q} --verbose 2> /tmp/stderr > /tmp/stdout
   status=$?
