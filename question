@@ -59,7 +59,7 @@ function __set_type_settings() {
       FORMAT_HINT="ami-xxxxxxxx"
     ;;
     "list")
-      ACCEPTED_INPUTS="^[^\ ]+$"
+      ACCEPTED_INPUTS=".*"
       FORMAT_HINT="comma delimited list"
     ;;
     "environment")
@@ -115,11 +115,12 @@ function __answer_valid() {
     ATTEMPT=$(( ${ATTEMPT} + 1 ))
   fi
 
+  # TODO: refactor
   case "${TYPE}" in
     "date")           ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
     "existing-file")  [[ -f "${ANSWER}" ]]                                  ;;
-    "list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
-    "regex"|"ami"|"environment"|"instance-id"|"integer"|"multiword"|"singleword"|"yes_no")    echo "${ANSWER}" | egrep "${ACCEPTED_INPUTS}" &> /dev/null ;;
+    #"list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
+    *)    echo "${ANSWER}" | egrep "${ACCEPTED_INPUTS}" &> /dev/null ;;
   esac
   return $?
 }
@@ -144,6 +145,7 @@ function print_answer() {
     ANSWER=$(echo ${ANSWER} | sed 's/^/"/' | sed 's/\ *,\ */" "/g' | sed 's/$/"/')
   fi
 
+  # TODO: refactor
   if [[ -z ${VERBOSE} ]]; then
     case "${TYPE}" in
       "yes_no")   VERBOSE="no"    ;;
@@ -202,7 +204,12 @@ if [[ "${REVALIDATE}" == "yes" ]]; then
 else
   print_question > /dev/stderr
   read ANSWER
-  if ! __answer_valid; then echo ${ERROR_MSG}; exit 1; fi   # TODO: refactor
+
+  # TODO: refactor
+  if ! __answer_valid; then
+    echo ${ERROR_MSG}
+    exit 1
+  fi
 fi
 
 print_answer
