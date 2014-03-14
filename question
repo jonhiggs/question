@@ -119,7 +119,7 @@ function __answer_valid() {
     "date")           ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
     "existing-file")  [[ -f "${ANSWER}" ]]                                  ;;
     "list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
-    "regex"|"ami"|"environment"|"instance-id"|"integer"|"multiword"|"singleword"|"yes_no")    echo "${ANSWER}" | egrep ${ACCEPTED_INPUTS} &> /dev/null ;;
+    "regex"|"ami"|"environment"|"instance-id"|"integer"|"multiword"|"singleword"|"yes_no")    echo "${ANSWER}" | egrep "${ACCEPTED_INPUTS}" &> /dev/null ;;
   esac
   return $?
 }
