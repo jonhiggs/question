@@ -51,7 +51,6 @@ function error() {
 function __set_type_settings() {
   # set the defaults
   [[ -z ${QUESTION} ]]    && QUESTION="Please answer..."
-  [[ -z ${COLOUR} ]]      && COLOUR="yes" # TODO: look for cecho
   [[ -z ${ERROR_MSG} ]]   && ERROR_MSG="Invalid Response!"
   [[ -z ${NOTIFY} ]]      && NOTIFY="yes"
   [[ -z ${REVALIDATE} ]]  && REVALIDATE="yes"
@@ -60,6 +59,10 @@ function __set_type_settings() {
 
   [[ -z ${VERBOSE} ]]     && [[ "${TYPE}" == "yes_no" ]] && VERBOSE="no"
   [[ -z ${VERBOSE} ]]     && VERBOSE="yes"
+
+  [[ -z ${COLOUR} ]]      && [[ ! -z "$(which cecho)" ]] && COLOUR="yes"
+  [[ -z ${COLOUR} ]]      && COLOUR="no"
+
 
   case ${TYPE} in
     "existing-file")
@@ -149,13 +152,11 @@ function __strip() {
 }
 
 function print_question() {
-  cecho_path="$(which cecho)"
-  if [[ -z "${cecho_path}" ]]; then COLOUR="no"; fi
-
-  case "${COLOUR}" in
-    "yes")  ${cecho_path} -n --magenta "${QUESTION}" > /dev/stderr ;;
-    *)      echo -n "${QUESTION}" > /dev/stderr      ;;
-  esac
+  if [[ "${COLOUR}" == "yes" ]]; then
+    cecho -n --magenta "${QUESTION}" > /dev/stderr
+  else
+    echo -n "${QUESTION}" > /dev/stderr
+  fi
 }
 
 function print_answer() {
