@@ -51,7 +51,7 @@ function error() {
 function __set_type_settings() {
   # set the defaults
   [[ -z ${QUESTION} ]]    && QUESTION="Please answer..."
-  [[ -z ${COLOUR} ]]      && COLOUR="yes"
+  [[ -z ${COLOUR} ]]      && COLOUR="yes" # TODO: look for cecho
   [[ -z ${ERROR_MSG} ]]   && ERROR_MSG="Invalid Response!"
   [[ -z ${NOTIFY} ]]      && NOTIFY="yes"
   [[ -z ${REVALIDATE} ]]  && REVALIDATE="yes"
@@ -122,15 +122,11 @@ function __set_type_settings() {
 
 function __answer_valid() {
   if [[ -z "${ANSWER}" ]]; then return 1; fi
-  if [[ "${ATTEMPT}" -gt 30 ]]; then
-    echo "you seem to be having a hard time. ;)"
-    exit 1
-  fi
+  [[ "${ATTEMPT}" -gt 30 ]] && error "you seem to be having a hard time. ;)"
 
   if [[ ${TYPE} == "date" ]]; then
     if ! [[ $(${DATE_CMD} --version 2> /dev/null) =~ GNU\ coreutils ]]; then
-      echo "Error: You are not running GNU date."
-      exit 1
+      error "Error: You are not running GNU date."
     fi
   fi
 
