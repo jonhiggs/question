@@ -115,12 +115,10 @@ function __answer_valid() {
     ATTEMPT=$(( ${ATTEMPT} + 1 ))
   fi
 
-  # TODO: refactor
   case "${TYPE}" in
     "date")           ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
     "existing-file")  [[ -f "${ANSWER}" ]]                                  ;;
-    #"list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
-    *)    echo "${ANSWER}" | egrep "${ACCEPTED_INPUTS}" &> /dev/null ;;
+    *)                echo "${ANSWER}" | egrep "${ACCEPTED_INPUTS}" &> /dev/null ;;
   esac
   return $?
 }
