@@ -120,6 +120,12 @@ function testList() {
   assertEquals "stdout"         '"quote (\")"'                      "$(cat /tmp/stdout)"
   assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
 
+  yes ",," | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
+  status=$?
+  assertEquals "exit status"    "${status}"                 "0"
+  assertEquals "stdout"         '"" "" ""'                  "$(cat /tmp/stdout)"
+  assertEquals "stderr"         "question (comma delimited list)? " "$(cat /tmp/stderr)"
+
   yes "" | ${Q} --type=list 2> /tmp/stderr > /tmp/stdout
   status=$?
   assertEquals "exit status"    "${status}"                 "1"
