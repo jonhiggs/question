@@ -28,23 +28,6 @@ EOF
   exit 1
 }
 
-function __format_question() {
-  case ${TYPE} in
-    "regex")          QUESTION="${QUESTION} ('${ACCEPTED_INPUTS}')? ";;
-    "ami")            QUESTION="${QUESTION} (ami-xxxxxxxx)? " ;;
-    "date")           QUESTION="${QUESTION} (date)? " ;;
-    "environment")    QUESTION="${QUESTION} (testing|staging|production)? " ;;
-    "existing-file")  QUESTION="${QUESTION} (file)? " ;;
-    "instance-id")    QUESTION="${QUESTION} (i-xxxxxxxx)? " ;;
-    "integer")        QUESTION="${QUESTION} (integer)? " ;;
-    "list")           QUESTION="${QUESTION} (comma delimited list)? " ;;
-    "multiword")      QUESTION="${QUESTION} (string)? " ;;
-    "singleword")     QUESTION="${QUESTION} (single word)? " ;;
-    "yes_no")         QUESTION="${QUESTION} (yes|no)? " ;;
-    *)                return 1 ;;
-  esac
-}
-
 function __notifier() {
   if [[ "${NOTIFY}" == "no" ]]; then return 0; fi
   if ! which terminal-notifier &> /dev/null; then return 0; fi
@@ -55,12 +38,61 @@ function __notifier() {
     > /dev/null
 }
 
-function __type_valid() {
-  types="ami date environment existing-file instance-id integer list multiword singleword yes_no regex"
-  for t in ${types}; do
-    if [[ ${TYPE} == $t ]]; then return 0; fi
-  done
-  return 1
+function __set_type_settings() {
+  case ${TYPE} in
+    "existing-file")
+      ACCEPTED_INPUTS=""
+      ERROR_MSG="File does not exist!"
+      FORMAT_HINT="file"
+    ;;
+    "date")
+      ACCEPTED_INPUTS=""
+      ERROR_MSG="Not a date!"
+      FORMAT_HINT="date"
+    ;;
+    "regex")
+      ACCEPTED_INPUTS=${ACCEPTED_INPUTS}
+      FORMAT_HINT="'${ACCEPTED_INPUTS}'"
+    ;;
+    "ami")
+      ACCEPTED_INPUTS="^ami-[a-f0-9]{8}$"
+      FORMAT_HINT="ami-xxxxxxxx"
+    ;;
+    "list")
+      ACCEPTED_INPUTS="^[^\ ]+$"
+      FORMAT_HINT="comma delimited list"
+    ;;
+    "environment")
+      ACCEPTED_INPUTS="^(testing|staging|production)$"
+      ERROR_MSG="Not a valid environment!"
+      FORMAT_HINT="testing|staging|production"
+    ;;
+    "instance-id")
+      ACCEPTED_INPUTS="^i-[a-f0-9]{8}$"
+      ERROR_MSG="Not a valid instance-id!"
+      FORMAT_HINT="i-xxxxxxxx"
+    ;;
+    "integer")
+      ACCEPTED_INPUTS="^[0-9]+$"
+      FORMAT_HINT="integer"
+    ;;
+    "multiword")
+      ACCEPTED_INPUTS="^.*[^\ ].*$"
+      FORMAT_HINT="string"
+    ;;
+    "singleword")
+      ACCEPTED_INPUTS="^[^\ ]+$"
+      FORMAT_HINT="single word"
+    ;;
+    "yes_no")
+      ACCEPTED_INPUTS="^(yes|no)$"
+      FORMAT_HINT="yes|no"
+    ;;
+    *)
+      usage
+    ;;
+  esac
+
 }
 
 function __answer_valid() {
@@ -84,17 +116,10 @@ function __answer_valid() {
   fi
 
   case "${TYPE}" in
-    "ami")            [[ "${ANSWER}" =~ ^ami-[0-9a-f]{8}$ ]]                ;;
     "date")           ANSWER=$(${DATE_CMD} --date="${ANSWER}" --rfc-3339="${DATE_ACCURACY}" 2> /dev/null) ;;
-    "environment")    [[ "${ANSWER}" =~ (testing|staging|production) ]]     ;;
     "existing-file")  [[ -f "${ANSWER}" ]]                                  ;;
-    "instance-id")    [[ "${ANSWER}" =~ ^i-[0-9a-f]{8}$ ]]                  ;;
-    "integer")        [[ "${ANSWER}" =~ ^[0-9]+$ ]]                         ;;
     "list")           [[ "${ANSWER}" =~ ^.+$ ]]                             ;;
-    "multiword")      [[ ! -z "${ANSWER}" ]]                                ;;
-    "regex")          echo "${ANSWER}" | egrep ${ACCEPTED_INPUTS} &> /dev/null ;;
-    "singleword")     [[ "${ANSWER}" =~ ^[^\ ]+$ ]]                         ;;
-    "yes_no")         [[ "${ANSWER}" =~ (yes|no) ]]                         ;;
+    "regex"|"ami"|"environment"|"instance-id"|"integer"|"multiword"|"singleword"|"yes_no")    echo "${ANSWER}" | egrep ${ACCEPTED_INPUTS} &> /dev/null ;;
   esac
   return $?
 }
@@ -142,6 +167,7 @@ TITLE="question_script"
 TYPE="yes_no"
 DATE_CMD=$(which gdate || which date)
 DATE_ACCURACY="seconds"
+[[ -z ${ERROR_MSG} ]] && ERROR_MSG="Invalid Response!"
 
 ### USER SETTINGS #############################################################
 for arg in "$@"; do
@@ -162,10 +188,11 @@ for arg in "$@"; do
   esac
 done
 
+__set_type_settings
+QUESTION="${QUESTION} (${FORMAT_HINT})? "
+
 [[ -z ${QUESTION} ]]        && usage
-__type_valid                || usage
 __notifier
-__format_question           || usage
 
 if [[ "${REVALIDATE}" == "yes" ]]; then
   while ! __answer_valid "${ANSWER}"; do
@@ -175,16 +202,7 @@ if [[ "${REVALIDATE}" == "yes" ]]; then
 else
   print_question > /dev/stderr
   read ANSWER
-
-  case "${TYPE}" in
-    "existing-file") error_msg="File does not exist!"     ;;
-    "date")          error_msg="Not a date!"              ;;
-    "environment")   error_msg="Not a valid environment!" ;;
-    "instance-id")   error_msg="Not a valid instance-id!" ;;
-    *)               error_msg="Invalid Response!"        ;;
-  esac
-
-  if ! __answer_valid; then echo ${error_msg}; exit 1; fi
+  if ! __answer_valid; then echo ${ERROR_MSG}; exit 1; fi   # TODO: refactor
 fi
 
 print_answer
